@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchAllCategories, fetchLandingCategories } from "../services/CategoriesService";
+import { fetchAllCategories, fetchLandingCategories } from "../services/categoriesService";
 import { Category } from "../types/Category";
 import { ApiResponse } from "../types/ApiResponse";
-import { fetchProductsByCategory } from "../services/CategoriesService";
+import { fetchProductsByCategory } from "../services/categoriesService";
 import { ProductByCategory } from "../types/ProductByCategory"
 
 export const useAllCategories = (language: string) => {
