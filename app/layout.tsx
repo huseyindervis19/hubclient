@@ -5,6 +5,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { LanguageProvider } from '@/components/language-provider'
 import { FloatingActionButtons } from '@/components/floating-action-buttons'
+import { ClientProviders } from '@/providers/ClientProviders';
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -78,12 +79,14 @@ export default function RootLayout({
         </script>
       </head>
       <body className={`font-sans antialiased`}>
+        <ClientProviders>
         <ThemeProvider>
           <LanguageProvider>
             {children}
             <FloatingActionButtons />
           </LanguageProvider>
         </ThemeProvider>
+        </ClientProviders>
         <Analytics />
       </body>
     </html>
