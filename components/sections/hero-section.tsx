@@ -1,39 +1,29 @@
 'use client'
 
 import { useLanguage } from '@/components/language-provider'
-import { useHomeSlider } from '@/lib/hooks'
+import { useHomeSlider } from '@/lib/hooks/useHomeSlider'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 export function HeroSection() {
   const { language, direction, message } = useLanguage()
-  const { sliderImages, loading } = useHomeSlider()
+
+  const { homeSlider, loading } = useHomeSlider(language)
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const [currentSlide, setCurrentSlide] = useState(0)
 
-  const slides = sliderImages.length > 0 ? sliderImages : []
-
   useEffect(() => {
-    if (slides.length === 0) return
-    
+    if (homeSlider.length === 0) return
+
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
+      setCurrentSlide((prev) => (prev + 1) % homeSlider.length)
     }, 5000)
+
     return () => clearInterval(interval)
-  }, [slides.length])
+  }, [homeSlider.length])
 
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-  }
-
-  const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length)
-  }
-
-  const goToPrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
-  }
-
-  if (loading || slides.length === 0) {
+  if (loading || homeSlider.length === 0) {
     return (
       <section className="relative w-full h-screen min-h-[600px] overflow-hidden bg-muted flex items-center justify-center">
         <p className="text-foreground">{message('loading') || 'Loading...'}</p>
@@ -41,23 +31,22 @@ export function HeroSection() {
     )
   }
 
-  const currentSlideData = slides[currentSlide]
+  const slide = homeSlider[currentSlide]
 
   return (
     <section className="relative w-full h-screen min-h-[600px] overflow-hidden">
 
       {/* Background slides */}
       <div className="absolute inset-0 w-full h-full">
-        {slides.map((slide, index) => (
+        {homeSlider.map((s, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
+              }`}
           >
             <img
-              src={slide.image_url || "/placeholder.svg"}
-              alt={slide.title[language]}
+              src={s.imageUrl ? `${baseUrl}${s.imageUrl}` : "/images/no_image.png"}
+              alt={s.translated.title}
               className="w-full h-full object-cover"
             />
           </div>
@@ -67,14 +56,11 @@ export function HeroSection() {
       {/* Black overlay */}
       <div className="absolute inset-0 bg-black/40 z-10" />
 
-      {/* 🔥🔥🔥 TEXT LAYER ON TOP OF EVERYTHING */}
+      {/* TEXT */}
       <div className="relative z-50 flex flex-col items-center justify-center text-center h-full px-4">
 
-        {/* 🔥 The missing sentence */}
-        <p
-          className="text-white text-3xl md:text-5xl font-bold mb-6"
-          style={{ direction }}
-        >
+        {/* STATIC TOP SENTENCE */}
+        <p className="text-white text-3xl md:text-5xl font-bold mb-6" style={{ direction }}>
           {language === 'ar'
             ? "أفضل أنواع الرخام الفاخر الطبيعي"
             : "Premium Natural Marble Collections"}
@@ -82,25 +68,25 @@ export function HeroSection() {
 
         {/* Title */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
-          {currentSlideData?.title[language]}
+          {slide.translated.title}
         </h1>
 
         {/* Subtitle */}
         <p className="text-lg md:text-2xl text-white/90 mb-8">
-          {currentSlideData?.subtitle[language]}
+          {slide.translated.subTitle}
         </p>
 
         <Link
-          href={currentSlideData?.cta_link || '/products'}
+          href={slide.ctaLink || '/products'}
           className="px-8 py-3 bg-accent text-accent-foreground font-semibold rounded-lg"
         >
-          {currentSlideData?.cta_text[language]}
+          {slide.translated.ctaText}
         </Link>
       </div>
 
-      {/* Navigation buttons */}
+      {/* Navigation Buttons */}
       <button
-        onClick={goToPrev}
+        onClick={() => setCurrentSlide((prev) => (prev - 1 + homeSlider.length) % homeSlider.length)}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/20 hover:bg-white/40 text-white hidden md:block"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +95,7 @@ export function HeroSection() {
       </button>
 
       <button
-        onClick={goToNext}
+        onClick={() => setCurrentSlide((prev) => (prev + 1) % homeSlider.length)}
         className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/20 hover:bg-white/40 text-white hidden md:block"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,13 +105,12 @@ export function HeroSection() {
 
       {/* Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2">
-        {slides.map((_, index) => (
+        {homeSlider.map((_, index) => (
           <button
             key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentSlide ? 'bg-accent w-8' : 'bg-white/50 hover:bg-white/70'
-            }`}
+            onClick={() => setCurrentSlide(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-accent w-8' : 'bg-white/50 hover:bg-white/70'
+              }`}
           />
         ))}
       </div>
