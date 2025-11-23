@@ -3,6 +3,7 @@
 import { useLanguage } from '@/components/language-provider'
 import { useState } from 'react'
 import { MapPin, Phone, Mail, Clock } from 'lucide-react'
+import { useCreateContactRequest } from '../../lib/hooks/useContactRequest'
 
 export function ContactPage() {
   const { language, direction } = useLanguage()
@@ -15,6 +16,8 @@ export function ContactPage() {
   })
   const [submitted, setSubmitted] = useState(false)
 
+  const createContactRequest = useCreateContactRequest()
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
@@ -22,14 +25,16 @@ export function ContactPage() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('[v0] Contact form submitted:', formData)
-    setSubmitted(true)
-    setTimeout(() => {
+    try {
+      await createContactRequest.mutateAsync(formData)
+      setSubmitted(true)
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
-      setSubmitted(false)
-    }, 3000)
+      setTimeout(() => setSubmitted(false), 3000)
+    } catch (error) {
+      console.error('Error submitting contact request:', error)
+    }
   }
 
   const contactInfo = [
@@ -158,8 +163,11 @@ export function ContactPage() {
                 <button
                   type="submit"
                   className="w-full px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover-lift button-pulse"
+                  disabled={createContactRequest.isPending}
                 >
-                  {language === 'en' ? 'Send Message' : 'إرسال الرسالة'}
+                  {createContactRequest.isPending
+                    ? language === 'en' ? 'Sending...' : 'جارٍ الإرسال...'
+                    : language === 'en' ? 'Send Message' : 'إرسال الرسالة'}
                 </button>
               </form>
             </div>
