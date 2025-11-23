@@ -2,10 +2,14 @@
 
 import Link from 'next/link'
 import { useLanguage } from '@/components/language-provider'
-import { Facebook, Instagram, Twitter, Linkedin } from 'lucide-react'
+import { useContactInfo } from '@/lib/hooks/useContactInfo'
+import { useSocialLinks } from '@/lib/hooks/useSocialLinks'
 
 export function Footer() {
   const { language, direction } = useLanguage()
+
+  const { data: contactInfo } = useContactInfo(language)
+  const { data: socialLinks } = useSocialLinks()
 
   const navLinks = [
     { key: 'home', href: '/' },
@@ -20,18 +24,15 @@ export function Footer() {
     ar: ['الرئيسية', 'الفئات', 'المنتجات', 'معلومات عنا', 'اتصل بنا'],
   }
 
-  const socialLinks = [
-    { icon: Facebook, href: '#' },
-    { icon: Instagram, href: '#' },
-    { icon: Twitter, href: '#' },
-    { icon: Linkedin, href: '#' },
-  ]
-
   return (
-    <footer className={`bg-primary text-primary-foreground border-t border-border ${direction === 'rtl' ? 'rtl' : ''}`}>
+    <footer
+      className={`bg-primary text-primary-foreground border-t border-border ${direction === 'rtl' ? 'rtl' : ''}`}
+    >
       <div className="container mx-auto px-4 py-12">
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Company Info */}
+
+          {/* ================= COMPANY INFO ================= */}
           <div>
             <h3 className="font-bold text-lg mb-4">
               {language === 'en' ? 'Elegant Torch' : 'مؤسسة الشعلة الراقية'}
@@ -43,11 +44,12 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* ================= QUICK LINKS ================= */}
           <div>
             <h4 className="font-semibold mb-4">
               {language === 'en' ? 'Quick Links' : 'روابط سريعة'}
             </h4>
+
             <ul className="space-y-2 text-sm">
               {navLinks.map((link, idx) => (
                 <li key={link.href}>
@@ -59,39 +61,45 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* ================= CONTACT INFO (DYNAMIC) ================= */}
           <div>
             <h4 className="font-semibold mb-4">
               {language === 'en' ? 'Contact' : 'اتصل'}
             </h4>
+
             <ul className="space-y-2 text-sm opacity-80">
-              <li>+1 (555) 123-4567</li>
-              <li>info@marblecompany.com</li>
-              <li>123 Stone Street, City, State</li>
+              <li>{contactInfo?.phone}</li>
+              <li>{contactInfo?.email}</li>
+              <li>{contactInfo?.translated?.address}</li>
             </ul>
           </div>
 
-          {/* Social Links */}
+          {/* ================= SOCIAL LINKS (DYNAMIC) ================= */}
           <div>
             <h4 className="font-semibold mb-4">
               {language === 'en' ? 'Follow Us' : 'تابعنا'}
             </h4>
+
             <div className="flex gap-4">
-              {socialLinks.map(({ icon: Icon }, idx) => (
-                <a
-                  key={idx}
-                  href="#"
-                  className="p-2 hover:bg-primary-foreground hover:text-primary rounded-lg smooth-transition"
-                  aria-label="Social link"
-                >
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
+              {socialLinks?.map((item, idx) => {
+                const Icon = require("lucide-react")[item.icon]
+
+                return (
+                  <a
+                    key={idx}
+                    href={item.url}
+                    className="p-2 hover:bg-primary-foreground hover:text-primary rounded-lg smooth-transition"
+                  >
+                    {Icon ? <Icon className="w-5 h-5" /> : item.icon}
+                  </a>
+                )
+              })}
             </div>
           </div>
+
         </div>
 
-        {/* Bottom Section */}
+        {/* ================= FOOTER BOTTOM ================= */}
         <div className="border-t border-primary-foreground/20 pt-8 text-center text-sm opacity-80">
           <p>
             {language === 'en'
