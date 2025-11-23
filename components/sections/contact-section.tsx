@@ -3,6 +3,7 @@
 import { useLanguage } from '@/components/language-provider'
 import { useContactInfo } from '@/lib/hooks'
 import { useState } from 'react'
+import { useCreateContactRequest } from '../../lib/hooks/useContactRequest'
 
 export function ContactSection() {
   const { language, direction, message } = useLanguage()
@@ -15,6 +16,8 @@ export function ContactSection() {
   })
   const [submitted, setSubmitted] = useState(false)
 
+  const createContactRequest = useCreateContactRequest()
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
@@ -22,13 +25,16 @@ export function ContactSection() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
-    setTimeout(() => {
+    try {
+      await createContactRequest.mutateAsync(formData)
+      setSubmitted(true)
       setFormData({ name: '', email: '', phone: '', message: '' })
-      setSubmitted(false)
-    }, 3000)
+      setTimeout(() => setSubmitted(false), 3000)
+    } catch (error) {
+      console.error('Error submitting contact request:', error)
+    }
   }
 
   const fields = [
@@ -97,8 +103,11 @@ export function ContactSection() {
           <button
             type="submit"
             className="w-full px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover-lift"
+            disabled={createContactRequest.isPending}
           >
-            {message('contact.form.submit')}
+            {createContactRequest.isPending
+              ? language === 'en' ? 'Submitting...' : 'جارٍ الإرسال...'
+              : message('contact.form.submit')}
           </button>
         </form>
 
