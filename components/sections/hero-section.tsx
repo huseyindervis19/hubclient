@@ -5,28 +5,24 @@ import { useHomeSlider } from '@/lib/hooks/useHomeSlider'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-export function HeroSection() {
+const HeroSection = () => {
   const { language, direction, message } = useLanguage()
-
   const { homeSlider, loading } = useHomeSlider(language)
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
   const [currentSlide, setCurrentSlide] = useState(0)
 
   useEffect(() => {
     if (homeSlider.length === 0) return
-
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % homeSlider.length)
     }, 5000)
-
     return () => clearInterval(interval)
   }, [homeSlider.length])
 
   if (loading || homeSlider.length === 0) {
     return (
       <section className="relative w-full h-screen min-h-[600px] overflow-hidden bg-muted flex items-center justify-center">
-        <p className="text-foreground">{message('loading') || 'Loading...'}</p>
+        <p className="text-foreground">{message('loading', 'Loading...')}</p>
       </section>
     )
   }
@@ -35,43 +31,32 @@ export function HeroSection() {
 
   return (
     <section className="relative w-full h-screen min-h-[600px] overflow-hidden">
-
-      {/* Background slides */}
       <div className="absolute inset-0 w-full h-full">
         {homeSlider.map((s, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
-              }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
           >
             <img
-              src={s.imageUrl ? `${baseUrl}${s.imageUrl}` : "/images/no_image.png"}
-              alt={s.translated.title}
+              src={s.imageUrl ? `${baseUrl}${s.imageUrl}` : '/images/no_image.png'}
+              alt={s.translated.title || message('hero.alt', 'Hero Image')}
               className="w-full h-full object-cover"
             />
           </div>
         ))}
       </div>
 
-      {/* Black overlay */}
       <div className="absolute inset-0 bg-black/40 z-10" />
 
-      {/* TEXT */}
       <div className="relative z-50 flex flex-col items-center justify-center text-center h-full px-4">
-
-        {/* STATIC TOP SENTENCE */}
         <p className="text-white text-3xl md:text-5xl font-bold mb-6" style={{ direction }}>
-          {language === 'ar'
-            ? "أفضل أنواع الرخام الفاخر الطبيعي"
-            : "Premium Natural Marble Collections"}
+          {message('hero.topText', 'Premium Natural Marble Collections')}
         </p>
 
-        {/* Title */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
           {slide.translated.title}
         </h1>
 
-        {/* Subtitle */}
         <p className="text-lg md:text-2xl text-white/90 mb-8">
           {slide.translated.subTitle}
         </p>
@@ -84,7 +69,6 @@ export function HeroSection() {
         </Link>
       </div>
 
-      {/* Navigation Buttons */}
       <button
         onClick={() => setCurrentSlide((prev) => (prev - 1 + homeSlider.length) % homeSlider.length)}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/20 hover:bg-white/40 text-white hidden md:block"
@@ -103,18 +87,17 @@ export function HeroSection() {
         </svg>
       </button>
 
-      {/* Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2">
         {homeSlider.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-accent w-8' : 'bg-white/50 hover:bg-white/70'
-              }`}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-accent w-8' : 'bg-white/50 hover:bg-white/70'}`}
           />
         ))}
       </div>
-
     </section>
   )
 }
+
+export default HeroSection

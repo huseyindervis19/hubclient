@@ -4,7 +4,7 @@ import { ApiResponse } from "../types/ApiResponse";
 import { fetchAboutUs } from "../services/aboutUsService";
 
 export const useAboutUs = (language: string) => {
-  return useQuery<ApiResponse<AboutUs[]>>({
+  return useQuery<ApiResponse<AboutUs>>({ // <-- كائن واحد وليس مصفوفة
     queryKey: ["aboutUs", language],
     queryFn: () => fetchAboutUs(language),
   });

@@ -1,10 +1,10 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import type { Language } from '@/lib/types'
-import translationsData from '@/lib/mock/translations.json'
+import type { Language } from '@/lib/types/rw'
+import translationsData from '../lib/mock/translations.json'
 
-const translations = translationsData.data
+const translations = translationsData.data as Record<string, Record<string, string>>
 
 interface LanguageContextType {
   language: Language
@@ -40,35 +40,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }
 
   const message = (key: string, defaultValue?: string): string => {
-    const keys = key.split('.')
+    const langPack = translations[language] as Record<string, string>
+    const enPack = translations['en'] as Record<string, string>
 
-    let value: any = translations[language]
-    for (const k of keys) {
-      if (value && typeof value === 'object' && k in value) {
-        value = value[k]
-      } else {
-        value = null
-        break
-      }
-    }
-
-    if (typeof value === 'string') {
-      return value
-    }
-
+    if (key in langPack) return langPack[key]
+    if (key in enPack) return enPack[key]
     if (defaultValue) return defaultValue
-
-    let fallback: any = translations["en"]
-    for (const k of keys) {
-      if (fallback && typeof fallback === 'object' && k in fallback) {
-        fallback = fallback[k]
-      } else {
-        fallback = null
-        break
-      }
-    }
-
-    if (typeof fallback === 'string') return fallback
 
     return key
   }

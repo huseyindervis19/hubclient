@@ -5,17 +5,15 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useAllCategories } from '@/lib/hooks/useCategories'
 
-export function CategoriesGrid() {
-  const { language, direction } = useLanguage()
-  const [hoveredCategory, setHoveredCategory] = useState<number | null>(null)
-
+const CategoriesGrid = () => {
+  const { language, direction, message } = useLanguage()
   const { data, isLoading, error } = useAllCategories(language)
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
 
   if (isLoading) {
     return (
       <section className="py-20 text-center text-lg">
-        {language === 'en' ? 'Loading categories...' : 'جارٍ تحميل الفئات...'}
+        {message('loading', 'Loading...')}
       </section>
     )
   }
@@ -23,7 +21,7 @@ export function CategoriesGrid() {
   if (error || !data?.data) {
     return (
       <section className="py-20 text-center text-lg text-red-500">
-        {language === 'en' ? 'Failed to load categories.' : 'فشل تحميل الفئات.'}
+        {message('loading.error', 'Failed to load data.')}
       </section>
     )
   }
@@ -33,14 +31,15 @@ export function CategoriesGrid() {
   return (
     <section className={`py-20 ${direction === 'rtl' ? 'rtl' : ''}`}>
       <div className="container mx-auto px-4">
-        <h1 className="text-5xl md:text-6xl font-bold text-center mb-4 text-primary">
-          {language === 'en' ? 'All Categories' : 'جميع الفئات'}
+        <h1 className="text-5xl md:text-6xl  font-bold text-center mb-4 text-foreground">
+          {message('categories.all', 'All Categories')}
         </h1>
 
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          {language === 'en'
-            ? 'Browse our complete selection of marble and stone categories'
-            : 'تصفح مجموعتنا الكاملة من فئات الرخام والحجر'}
+          {message(
+            'categories.all.subtitle',
+            'Browse our complete selection of marble and stone categories'
+          )}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,14 +47,12 @@ export function CategoriesGrid() {
             <Link
               key={category.id}
               href={`/products?category=${category.id}`}
-              onMouseEnter={() => setHoveredCategory(category.id)}
-              onMouseLeave={() => setHoveredCategory(null)}
               className="group"
             >
               <div className="bg-card rounded-lg overflow-hidden border border-border hover:border-accent smooth-transition hover-lift h-full flex flex-col">
                 <div className="relative h-56 overflow-hidden">
                   <img
-                    src={category.imageUrl ? `${baseUrl}${category.imageUrl}` : "/images/no_image.png"}
+                    src={category.imageUrl ? `${baseUrl}${category.imageUrl}` : '/images/no_image.png'}
                     alt={category.translated.name}
                     className="w-full h-full object-cover group-hover:scale-110 smooth-transition"
                   />
@@ -72,7 +69,7 @@ export function CategoriesGrid() {
                   </p>
 
                   <button className="mt-4 w-full px-4 py-2 bg-accent text-accent-foreground rounded font-semibold hover:bg-accent/90 transition-colors text-sm scale-in">
-                    {language === 'en' ? 'View Products' : 'عرض المنتجات'}
+                    {message('categories.viewproducts', 'View Products')}
                   </button>
                 </div>
               </div>
@@ -83,3 +80,5 @@ export function CategoriesGrid() {
     </section>
   )
 }
+
+export default CategoriesGrid

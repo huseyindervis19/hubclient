@@ -1,22 +1,44 @@
 'use client'
 
-import { useLanguage } from '@/components/language-provider'
 import { useState } from 'react'
 import { MapPin, Phone, Mail, Clock } from 'lucide-react'
+import { useLanguage } from '@/components/language-provider'
 import { useCreateContactRequest } from '../../lib/hooks/useContactRequest'
+import { useContactInfo } from '../../lib/hooks/useContactInfo'
 
-export function ContactPage() {
-  const { language, direction } = useLanguage()
+const ContactPage = () => {
+  const { language, direction, message } = useLanguage()
+  const { data: contactInfo } = useContactInfo(language)
+  const createContactRequest = useCreateContactRequest()
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    subject: '',
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
 
-  const createContactRequest = useCreateContactRequest()
+  const inputFields = [
+    {
+      name: 'name',
+      placeholder: message('contact.form.name', 'Your Name'),
+      type: 'text',
+      isHalfWidth: true
+    },
+    {
+      name: 'email',
+      placeholder: message('contact.form.email', 'Email Address'),
+      type: 'email',
+      isHalfWidth: true
+    },
+    {
+      name: 'phone',
+      placeholder: message('contact.form.phone', 'Phone Number'),
+      type: 'tel',
+      isHalfWidth: false
+    },
+  ]
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -30,159 +52,164 @@ export function ContactPage() {
     try {
       await createContactRequest.mutateAsync(formData)
       setSubmitted(true)
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+      setFormData({ name: '', email: '', phone: '', message: '' })
       setTimeout(() => setSubmitted(false), 3000)
     } catch (error) {
-      console.error('Error submitting contact request:', error)
+      console.error(error)
     }
   }
 
-  const contactInfo = [
-    {
-      icon: MapPin,
-      title: { en: 'Address', ar: 'العنوان' },
-      details: { en: 'Jeddah, Saudi Arabia', ar: 'جدة، المملكة العربية السعودية' },
-    },
-    {
-      icon: Phone,
-      title: { en: 'Phone', ar: 'الهاتف' },
-      details: { en: '+966 12 345 6789', ar: '+966 12 345 6789' },
-    },
-    {
-      icon: Mail,
-      title: { en: 'Email', ar: 'البريد الإلكتروني' },
-      details: { en: 'info@marblecompany.sa', ar: 'info@marblecompany.sa' },
-    },
-    {
-      icon: Clock,
-      title: { en: 'Hours', ar: 'الساعات' },
-      details: { en: 'Mon-Fri: 9AM - 6PM', ar: 'الأحد - الخميس: 9 صباحاً - 6 مساءً' },
-    },
-  ]
-
   return (
-    <div className={`${direction === 'rtl' ? 'rtl' : ''}`}>
-      {/* Hero */}
+    <div className={direction === 'rtl' ? 'rtl' : ''}>
       <section className="py-20 bg-secondary/50">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl md:text-6xl font-bold text-primary mb-4 slide-in-up">
-            {language === 'en' ? 'Contact Us' : 'اتصل بنا'}
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4 slide-in-up">
+            {message('contact.title', 'Contact Us')}
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl slide-in-up" style={{ animationDelay: '0.1s' }}>
-            {language === 'en'
-              ? 'Get in touch with our team for inquiries, quotes, and consultations'
-              : 'تواصل مع فريقنا للاستفسارات والعروض والاستشارات'}
+            {message(
+              'contact.hero.subtitle',
+              'Get in touch with our team for inquiries, quotes, and consultations'
+            )}
           </p>
         </div>
       </section>
 
-      {/* Contact Info */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {contactInfo.map((info, idx) => {
-              const Icon = info.icon
-              return (
-                <div key={idx} className="text-center slide-in-up" style={{ animationDelay: `${idx * 0.1}s` }}>
-                  <div className="inline-block p-4 bg-secondary rounded-lg mb-4">
-                    <Icon className="w-8 h-8 text-accent" />
-                  </div>
-                  <h3 className="font-bold text-lg text-foreground mb-2">{info.title[language]}</h3>
-                  <p className="text-muted-foreground">{info.details[language]}</p>
+          {!contactInfo ? (
+            <p className="text-center text-muted-foreground mb-16">
+              {message('loading', 'Loading contact information...')}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+              <div className="text-center slide-in-up">
+                <div className="inline-block p-4 bg-secondary rounded-lg mb-4">
+                  <MapPin className="w-8 h-8 text-accent" />
                 </div>
-              )
-            })}
-          </div>
+                <h3 className="font-bold text-lg text-foreground mb-2">
+                  {message('contact.address', 'Address')}
+                </h3>
+                <p className="text-muted-foreground">
+                  {contactInfo.translated?.address}
+                </p>
+              </div>
 
-          {/* Contact Form & Map */}
+              <div className="text-center slide-in-up">
+                <div className="inline-block p-4 bg-secondary rounded-lg mb-4">
+                  <Phone className="w-8 h-8 text-accent" />
+                </div>
+                <h3 className="font-bold text-lg text-foreground mb-2">
+                  {message('contact.phone', 'Phone')}
+                </h3>
+                <p className="text-muted-foreground">
+                  {contactInfo.phone}
+                </p>
+              </div>
+
+              <div className="text-center slide-in-up">
+                <div className="inline-block p-4 bg-secondary rounded-lg mb-4">
+                  <Mail className="w-8 h-8 text-accent" />
+                </div>
+                <h3 className="font-bold text-lg text-foreground mb-2">
+                  {message('contact.email', 'Email')}
+                </h3>
+                <p className="text-muted-foreground">
+                  {contactInfo.email}
+                </p>
+              </div>
+
+              <div className="text-center slide-in-up">
+                <div className="inline-block p-4 bg-secondary rounded-lg mb-4">
+                  <Clock className="w-8 h-8 text-accent" />
+                </div>
+                <h3 className="font-bold text-lg text-foreground mb-2">
+                  {message('contact.hours', 'Working Hours')}
+                </h3>
+                <p className="text-muted-foreground">
+                  {message('contact.working.hours', 'Sat–Thu: 9AM – 6PM')}
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Form */}
-            <div className="slide-in-up">
-              <h2 className="text-3xl font-bold text-primary mb-6">
-                {language === 'en' ? 'Send us a Message' : 'أرسل لنا رسالة'}
+            <div className="h-full flex flex-col">
+              <h2 className="text-3xl font-bold text-foreground mb-6">
+                {message('contact.form.title', 'Send us a Message')}
               </h2>
-
               {submitted && (
-                <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-lg font-semibold fade-in">
-                  {language === 'en' ? 'Message sent successfully! We will contact you soon.' : 'تم إرسال الرسالة بنجاح! سنتواصل معك قريباً.'}
+                <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-lg text-center font-semibold fade-in">
+                  {message('contact.form.success', 'Message sent successfully!')}
                 </div>
               )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 flex-1">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder={language === 'en' ? 'Your Name' : 'اسمك'}
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground smooth-transition"
-                  />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder={language === 'en' ? 'Your Email' : 'بريدك الإلكتروني'}
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground smooth-transition"
-                  />
+                  {inputFields.filter(f => f.isHalfWidth).map((field) => (
+                    <input
+                      key={field.name}
+                      type={field.type}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      value={formData[field.name as keyof typeof formData]}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-accent bg-background text-foreground smooth-transition"
+                    />
+                  ))}
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {inputFields.filter(f => !f.isHalfWidth).map((field) => (
                   <input
-                    type="tel"
-                    name="phone"
-                    placeholder={language === 'en' ? 'Phone Number' : 'رقم الهاتف'}
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground smooth-transition"
-                  />
-                  <input
-                    type="text"
-                    name="subject"
-                    placeholder={language === 'en' ? 'Subject' : 'الموضوع'}
-                    value={formData.subject}
+                    key={field.name}
+                    type={field.type}
+                    name={field.name}
+                    placeholder={field.placeholder}
+                    value={formData[field.name as keyof typeof formData]}
                     onChange={handleChange}
                     required
-                    className="px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground smooth-transition"
+                    className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-accent bg-background text-foreground smooth-transition"
                   />
-                </div>
-
+                ))}
                 <textarea
                   name="message"
-                  placeholder={language === 'en' ? 'Your Message' : 'رسالتك'}
+                  placeholder={message('contact.form.message', 'Your Message')}
                   value={formData.message}
                   onChange={handleChange}
                   required
-                  rows={6}
-                  className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground smooth-transition"
+                  rows={5}
+                  className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-accent bg-background text-foreground smooth-transition"
                 />
-
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover-lift button-pulse"
+                  className="w-full px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover-lift"
                   disabled={createContactRequest.isPending}
                 >
                   {createContactRequest.isPending
-                    ? language === 'en' ? 'Sending...' : 'جارٍ الإرسال...'
-                    : language === 'en' ? 'Send Message' : 'إرسال الرسالة'}
+                    ? message('contact.form.submitting', 'Submitting...')
+                    : message('contact.form.submit', 'Send Message')}
                 </button>
               </form>
             </div>
 
-            {/* Location Image */}
-            <div className="slide-in-up" style={{ animationDelay: '0.1s' }}>
-              <h2 className="text-3xl font-bold text-primary mb-6">
-                {language === 'en' ? 'Find Us' : 'ابحث عنا'}
+            <div className="slide-in-up h-full flex flex-col" style={{ animationDelay: '0.1s' }}>
+              <h2 className="text-3xl font-bold text-foreground mb-6">
+                {message('contact.location.title', 'Find Us')}
               </h2>
-              <div className="w-full h-96 bg-secondary rounded-lg overflow-hidden hover-lift">
-                <img
-                  src="/jeddah-marble-store-location.jpg"
-                  alt="Marble store location in Jeddah"
-                  className="w-full h-full object-cover"
-                />
+              <div className="flex-1 bg-secondary rounded-lg overflow-hidden hover-lift">
+                {contactInfo ? (
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    loading="lazy"
+                    allowFullScreen
+                    style={{ border: 0 }}
+                    src={`https://maps.google.com/maps?q=${contactInfo.latitude},${contactInfo.longitude}&z=15&output=embed`}
+                  ></iframe>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    {message('loading', 'Loading map...')}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -191,3 +218,5 @@ export function ContactPage() {
     </div>
   )
 }
+
+export default ContactPage

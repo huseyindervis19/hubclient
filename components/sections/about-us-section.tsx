@@ -4,12 +4,13 @@ import { useLanguage } from '@/components/language-provider'
 import { useAboutUs } from '@/lib/hooks/useAboutUs'
 import Link from 'next/link'
 
-export function AboutUsSection() {
+const AboutUsSection = () => {
   const { language, direction, message } = useLanguage()
   const { data: response, isLoading } = useAboutUs(language)
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
 
-  if (isLoading || !response?.data?.length) {
+
+  if (isLoading || !response?.data) {
     return (
       <section className={`py-20 bg-secondary/50 ${direction === 'rtl' ? 'rtl' : ''}`}>
         <div className="container mx-auto px-4 text-center">
@@ -18,33 +19,30 @@ export function AboutUsSection() {
       </section>
     )
   }
-
-  const aboutUs = response.data[0]
-  const data = aboutUs.translated
+  const aboutUs = response.data 
+  const translated = aboutUs.translated
 
   return (
     <section className={`py-20 bg-secondary/50 ${direction === 'rtl' ? 'rtl' : ''}`}>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          {/* Image */}
           <div className="h-96 rounded-lg overflow-hidden hover-lift">
             <img
               src={aboutUs.imageUrl ? `${baseUrl}${aboutUs.imageUrl}` : "/images/no_image.png"}
-              alt={data.mission}
+              alt={translated.mission}
               className="w-full h-full object-cover"
             />
           </div>
 
-          {/* Text */}
           <div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground slide-in-up">
               {message('aboutus.title')}
             </h2>
             <p className="text-lg text-foreground/90 mb-4 slide-in-up">
-              {data.story}
+              {translated.story}
             </p>
             <p className="text-lg text-foreground/80 mb-8 slide-in-up">
-              {data.mission}
+              {translated.mission}
             </p>
             <Link
               href="/aboutus"
@@ -58,3 +56,5 @@ export function AboutUsSection() {
     </section>
   )
 }
+
+export default AboutUsSection

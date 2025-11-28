@@ -2,7 +2,6 @@
 
 import { useLanguage } from '@/components/language-provider'
 import { useState } from 'react'
-import { Heart, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { useProductById } from '@/lib/hooks/useProducts'
 
@@ -10,18 +9,18 @@ interface ProductDetailsProps {
   productId: number
 }
 
-export function ProductDetails({ productId }: ProductDetailsProps) {
-  const { language, direction } = useLanguage()
+const ProductDetails = ({ productId }: ProductDetailsProps) => {
+  const { language, direction, message } = useLanguage()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  
+
   const { data, isLoading, isError } = useProductById(productId, language)
   const product = data?.data
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
 
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <p>{language === 'en' ? 'Loading product...' : 'جاري تحميل المنتج...'}</p>
+        <p>{message('loading', 'Loading...')}</p>
       </div>
     )
   }
@@ -30,7 +29,7 @@ export function ProductDetails({ productId }: ProductDetailsProps) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-2xl font-bold">
-          {language === 'en' ? 'Product not found' : 'المنتج غير موجود'}
+          {message('loading.error', 'Failed to load data.')}
         </h1>
       </div>
     )
@@ -57,17 +56,18 @@ export function ProductDetails({ productId }: ProductDetailsProps) {
           className="text-primary hover:text-accent mb-8 inline-flex items-center gap-2"
         >
           <span>←</span>
-          <span>{language === 'en' ? 'Back to Products' : 'العودة للمنتجات'}</span>
+          <span>{message('product.back', 'Back to Products')}</span>
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="space-y-4">
             <div className="relative h-96 lg:h-[500px] rounded-lg overflow-hidden bg-secondary group">
               <img
-                src={images[currentImageIndex] ? `${baseUrl}${images[currentImageIndex]}` : "/images/no_image.png"}
+                src={images[currentImageIndex] ? `${baseUrl}${images[currentImageIndex]}` : '/images/no_image.png'}
                 alt={name}
                 className="w-full h-full object-cover group-hover:scale-110 smooth-transition"
               />
+
               <button
                 onClick={prevImage}
                 className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white text-foreground smooth-transition"
@@ -76,6 +76,7 @@ export function ProductDetails({ productId }: ProductDetailsProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
+
               <button
                 onClick={nextImage}
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white text-foreground smooth-transition"
@@ -84,6 +85,7 @@ export function ProductDetails({ productId }: ProductDetailsProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
+
               <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
                 {currentImageIndex + 1} / {images.length}
               </div>
@@ -97,7 +99,11 @@ export function ProductDetails({ productId }: ProductDetailsProps) {
                   className={`w-20 h-20 rounded border-2 overflow-hidden smooth-transition ${idx === currentImageIndex ? 'border-accent' : 'border-border'
                     }`}
                 >
-                  <img src={img ? `${baseUrl}${img}` : "/images/no_image.png"} alt={`${name} ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img
+                    src={img ? `${baseUrl}${img}` : '/images/no_image.png'}
+                    alt={`${name} ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -107,14 +113,15 @@ export function ProductDetails({ productId }: ProductDetailsProps) {
             <div>
               <h1 className="text-4xl font-bold mb-2">{name}</h1>
             </div>
+
             <div className="bg-secondary/50 rounded-lg p-6 space-y-3">
-              <h3 className="font-bold text-lg mb-4">{language === 'en' ? 'Specifications' : 'المواصفات'}</h3>
-              <p className="text-lg text-muted-foreground">{description}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button className="px-6 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary/10 smooth-transition">
-                {language === 'en' ? 'Contact Us' : 'اتصل بنا'}
-              </button>
+              <h3 className="font-bold text-lg mb-4">
+                {message('product.specs', 'Specifications')}
+              </h3>
+
+              <p className="text-lg text-muted-foreground">
+                {description}
+              </p>
             </div>
           </div>
         </div>
@@ -122,3 +129,4 @@ export function ProductDetails({ productId }: ProductDetailsProps) {
     </section>
   )
 }
+export default ProductDetails

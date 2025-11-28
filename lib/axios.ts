@@ -16,24 +16,24 @@ const baseConfig: AxiosRequestConfig = {
 
 const apiClient: AxiosInstance = axios.create(baseConfig);
 
-//
-// Request Interceptor (Optional)
-//
 apiClient.interceptors.request.use(
-  (config) => {
-    return config;
-  },
+  (config) => config,
   (error: AxiosError) => {
-    console.error("Request error:", error.message);
+    console.error("Request Error:", error.message);
     return Promise.reject(error);
   }
 );
 
-//
-// Response Interceptor
-//
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    if (response.status === 204) {
+      return { ...response, data: {} };
+    }
+    if (response.data === null || response.data === undefined) {
+      return { ...response, data: {} };
+    }
+    return response;
+  },
   (error: AxiosError) => {
     if (error.response) {
       console.error("API Error:", {
@@ -41,13 +41,31 @@ apiClient.interceptors.response.use(
         status: error.response.status,
         data: error.response.data,
       });
-    } else if (error.request) {
-      console.error("No response received from server:", error.request);
-    } else {
-      console.error("Axios setup error:", error.message);
+
+      return Promise.reject({
+        message: "API responded with an error.",
+        status: error.response.status,
+        data: error.response.data,
+      });
     }
 
-    return Promise.reject(error);
+    if (error.request) {
+      console.error("No Response from Server:", error.request);
+
+      return Promise.reject({
+        message: "No response received from server.",
+        status: null,
+        data: null,
+      });
+    }
+
+    console.error("Axios Internal Error:", error.message);
+
+    return Promise.reject({
+      message: error.message || "Internal Axios error.",
+      status: null,
+      data: null,
+    });
   }
 );
 

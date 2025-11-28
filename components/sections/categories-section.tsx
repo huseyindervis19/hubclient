@@ -4,37 +4,35 @@ import { useLanguage } from '@/components/language-provider'
 import Link from 'next/link'
 import { useLandingCategories } from '@/lib/hooks/useCategories'
 
-export function CategoriesSection() {
+const CategoriesSection = () => {
   const { language, direction, message } = useLanguage()
 
   const { data, isLoading, error } = useLandingCategories(language)
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
 
   const categories = data?.data || []
 
   return (
     <section className={`py-20 bg-secondary/50 ${direction === 'rtl' ? 'rtl' : ''}`}>
       <div className="container mx-auto px-4">
-
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-foreground">
-          {message('categories.title', 'Categories')}
+          {message('categories.title', 'Explore Our Categories')}
         </h2>
 
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          {language === 'en'
-            ? 'Browse our extensive collection of premium marble and stone products'
-            : 'تصفح مجموعتنا الواسعة من منتجات الرخام والحجر الفاخرة'}
+          {message(
+            'categories.subtitle', 'Explore our diverse range of marble and stone categories')}
         </p>
 
         {isLoading && (
           <div className="text-center py-12">
-            <p>{message('loading') || 'Loading...'}</p>
+            <p>{message('loading', 'Loading...')}</p>
           </div>
         )}
 
         {error && (
           <div className="text-center py-12 text-red-500">
-            <p>{message('error') || 'Failed to load categories'}</p>
+            <p>{message('loading.error', 'Failed to load data')}</p>
           </div>
         )}
 
@@ -49,7 +47,7 @@ export function CategoriesSection() {
                 >
                   <div className="relative h-48 rounded-lg overflow-hidden mb-4 hover-lift">
                     <img
-                      src={category.imageUrl ? `${baseUrl}${category.imageUrl}` : "/images/no_image.png"}
+                      src={category.imageUrl ? `${baseUrl}${category.imageUrl}` : '/images/no_image.png'}
                       alt={category.translated.name}
                       className="w-full h-full object-cover group-hover:scale-110 smooth-transition"
                     />
@@ -72,13 +70,14 @@ export function CategoriesSection() {
                 href="/categories"
                 className="inline-block px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover-lift"
               >
-                {message('categories.showmore')}
+                {message('showmore', 'Show More')}
               </Link>
             </div>
           </>
         )}
-
       </div>
     </section>
   )
 }
+
+export default CategoriesSection
