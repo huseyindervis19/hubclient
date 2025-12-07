@@ -1,77 +1,177 @@
-'use client'
+"use client";
 
-import { useLanguage } from '@/components/language-provider'
-import { Heart } from 'lucide-react'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { useAllProducts } from '@/lib/hooks/useProducts'
+import { motion } from "motion/react";
+import { useLanguage } from "@/components/language-provider";
+import { ArrowUpRight, EyeIcon } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useAllProducts } from "@/lib/hooks/useProducts";
+import { staggerContainer, scaleUpVariant } from "@/lib/types/animations";
 
 const ProductsGrid = () => {
-  const { language, direction, message } = useLanguage()
+  const { language, direction, message } = useLanguage();
+  const { data, isLoading } = useAllProducts(language);
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const searchParams = useSearchParams();
+  const categoryId = searchParams.get("category");
+  const isRTL = direction === "rtl";
 
-  const { data, isLoading } = useAllProducts(language)
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL
+  if (isLoading)
+    return (
+      <p className="text-center py-20">{message("loading", "Loading...")}</p>
+    );
 
-  const searchParams = useSearchParams()
-  const categoryId = searchParams.get('category')
-
-  if (isLoading) return <p className="text-center py-20">Loading...</p>
-
-  const allProducts = data?.data || []
-
+  const allProducts = data?.data || [];
   const filteredProducts = categoryId
     ? allProducts.filter((p) => p.categoryId === parseInt(categoryId))
-    : allProducts
+    : allProducts;
 
   return (
-    <section className={`py-20 ${direction === 'rtl' ? 'rtl' : ''}`}>
+    <section className={`py-24 bg-background ${isRTL ? "rtl" : ""}`}>
       <div className="container mx-auto px-4">
-        <h1 className="text-5xl md:text-6xl font-bold text-center mb-4 text-foreground">
-          {message('our.products', 'Our Products')}
-        </h1>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          {message('products.all.title', 'Browse our collection of premium marble and stone products')}
-        </p>
+        {/* Header */}
+        <motion.div
+          className="text-center max-w-3xl mx-auto mb-16"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
+            {message("our.products", "Our Products")}
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            {message(
+              "products.all.title",
+              "Browse our collection of premium marble and stone products"
+            )}
+          </p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <div
+        {/* Products Grid */}
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="
+            grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
+            gap-8
+          "
+        >
+          {filteredProducts.map((product, index) => (
+            <motion.div
               key={product.id}
-              className="group bg-card rounded-lg overflow-hidden border border-border hover:border-accent hover-lift smooth-transition flex flex-col"
+              variants={scaleUpVariant}
+              custom={index}
             >
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={product.mainImage ? `${baseUrl}${product.mainImage}` : '/images/no_image.png'}
-                  alt={product.translated.name}
-                  className="w-full h-full object-cover group-hover:scale-110 smooth-transition"
-                />
-
-                <button className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full smooth-transition shadow-lg">
-                  <Heart className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-accent smooth-transition">
-                  {product.translated.name}
-                </h3>
-
-                <p className="text-sm text-muted-foreground mb-3 flex-1">
-                  {product.translated.description}
-                </p>
-
-                <Link
-                  href={`/products/${product.id}`}
-                  className="w-full px-4 py-2 bg-primary text-primary-foreground rounded font-medium hover:bg-primary/90 transition-colors text-sm text-center"
+              <Link
+                href={`/products/${product.id}`}
+                className="group block h-full"
+              >
+                <div
+                  className="
+                  h-full flex flex-col
+                  bg-card rounded-2xl overflow-hidden
+                  border border-border/50
+                  transition-all duration-500
+                  hover:border-primary/30
+                  hover:shadow-xl hover:shadow-primary/5
+                  hover:-translate-y-1
+                "
                 >
-                  {message('products.viewdetails', 'View Details')}
-                </Link>
-              </div>
-            </div>
+                  {/* Image */}
+                  <div className="relative h-56 overflow-hidden bg-muted/50">
+                    <motion.img
+                      whileHover={{ scale: 1.05 }}
+                      transition={{
+                        duration: 0.6,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      src={
+                        product.mainImage
+                          ? `${baseUrl}${product.mainImage}`
+                          : "/images/no_image.png"
+                      }
+                      alt={product.translated?.name}
+                      className="w-full h-full object-cover"
+                    />
+
+                    {/* Overlay */}
+                    <div
+                      className="
+                      absolute inset-0 
+                      bg-black/40 backdrop-blur-[2px]
+                      flex items-center justify-center
+                      opacity-0 group-hover:opacity-100
+                      transition-opacity duration-300
+                    "
+                    >
+                      <div
+                        className="
+                        p-3 rounded-full 
+                        bg-white/20 backdrop-blur-sm
+                        transform scale-75 group-hover:scale-100
+                        transition-transform duration-300
+                      "
+                      >
+                        <EyeIcon className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col p-5">
+                    <h3
+                      className="
+                      text-lg font-semibold text-foreground mb-2
+                      group-hover:text-primary
+                      transition-colors duration-300
+                      line-clamp-1
+                    "
+                    >
+                      {product.translated?.name}
+                    </h3>
+
+                    <p
+                      className="
+                      text-sm text-muted-foreground 
+                      leading-relaxed line-clamp-2
+                      mb-4 flex-1
+                    "
+                    >
+                      {product.translated?.description}
+                    </p>
+
+                    {/* View Details */}
+                    <div
+                      className="
+                      flex items-center gap-1 
+                      text-sm font-medium text-primary
+                      opacity-70 group-hover:opacity-100
+                      transition-opacity duration-300
+                    "
+                    >
+                      <span>
+                        {message("products.viewdetails", "View Details")}
+                      </span>
+                      <ArrowUpRight
+                        className="
+                        w-4 h-4
+                        transform transition-transform duration-300
+                        group-hover:translate-x-0.5 group-hover:-translate-y-0.5
+                      "
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
-  )
-}
-export default ProductsGrid
+  );
+};
+
+export default ProductsGrid;
