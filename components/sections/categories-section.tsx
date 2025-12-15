@@ -137,8 +137,8 @@ const CategoriesSection = () => {
       <div className="container mx-auto px-4 md:px-6 max-w-7xl">
         {/* Section Header */}
         <SectionHeader
-          topLabel={message("categories.top", "Our Collections")}
-          title={message("categories.title", "Explore Our Collections")}
+          topLabel={message("categories.top", "Our Categories")}
+          title={message("categories.title", "Explore Our Categories")}
           subtitle={message(
             "categories.subtitle",
             "Discover our diverse range of premium marble and natural stone categories"

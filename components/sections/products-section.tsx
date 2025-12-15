@@ -138,8 +138,8 @@ const ProductsSection = () => {
       <div className="container mx-auto px-4 md:px-6 max-w-7xl">
         {/* Section Header */}
         <SectionHeader
-          topLabel={message("products.label", "Featured Products")}
-          title={message("products.title", "Our Best Sellers")}
+          topLabel={message("products.label", "Our Products")}
+          title={message("products.title", "Our Best Products")}
           subtitle={message(
             "products.subtitle",
             "Handpicked selection of our best-selling marble and stone products"
@@ -190,14 +190,13 @@ const ProductsSection = () => {
               <Link href="/products">
                 <Button
                   size="lg"
-                  variant="outline"
                   className="
                     px-12 py-6 text-base
-                    hover:bg-primary hover:text-primary-foreground
+                    hover:shadow-lg hover:shadow-primary/20
                     transition-all duration-300
                   "
                 >
-                  {message("products.viewall", "View All Products")}
+                  {message("showmore", "Show More")}
                 </Button>
               </Link>
             </motion.div>
