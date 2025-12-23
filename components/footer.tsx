@@ -12,7 +12,8 @@ import {
   SiFacebook,
   SiLinkedin,
   SiInstagram,
-  SiX
+  SiX,
+  SiYoutube
 } from 'react-icons/si'
 
 /* -------------------------------------------------------------------------- */
@@ -25,7 +26,8 @@ const SOCIAL_ICONS = {
   Facebook: SiFacebook,
   Linkedin: SiLinkedin,
   Instagram: SiInstagram,
-  X: SiX
+  X: SiX,
+  Youtube: SiYoutube
 } as const
 
 type SocialIconName = keyof typeof SOCIAL_ICONS
@@ -49,9 +51,8 @@ const Footer = () => {
 
   return (
     <footer
-      className={`bg-primary text-primary-foreground border-t border-border ${
-        direction === 'rtl' ? 'rtl' : ''
-      }`}
+      className={`bg-primary text-primary-foreground border-t border-border ${direction === 'rtl' ? 'rtl' : ''
+        }`}
     >
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">

@@ -47,7 +47,7 @@ const Navbar = () => {
             <Link
               key={item.key}
               href={item.href}
-              className="text-sm font-medium text-foreground hover:text-primary smooth-transition relative group"
+              className="text-sm font-medium text-foreground smooth-transition relative group"
             >
               {item.label}
               <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-accent group-hover:w-full smooth-transition" />
